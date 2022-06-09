@@ -195,8 +195,6 @@ mhddos_run () {
     expressvpn disconnect
     sleep 5
     docker run -it --rm --name mhddos_proxy_container --pull always $MHDDOS_PROXY_SOURCE  -t $MHDDOS_THREADS -c $source_of_targets_url --table --debug
-  else
-    echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
   fi
   # Run mhddos_proxy using proxy without ExpressVPN. Targets: --itarmy
   if [ $vpn == "2" -a $source_of_targets == "3" ]; then
@@ -208,8 +206,6 @@ mhddos_run () {
     expressvpn disconnect
     sleep 5
     docker run -it --rm --name mhddos_proxy_container --pull always $MHDDOS_PROXY_SOURCE  -t $MHDDOS_THREADS --itarmy --table --debug
-  else
-    echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
   fi
 
   # Run mhddos_proxy using proxy with ExpressVPN. Targets: targets.txt
@@ -231,8 +227,6 @@ mhddos_run () {
     echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}$source_of_targets_url ${RESET}"
     expressvpn_configure
     docker run -it --rm --name mhddos_proxy_container --pull always $MHDDOS_PROXY_SOURCE  -t $MHDDOS_THREADS -c $source_of_targets_url --table --debug
-  else
-    echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
   fi
   # Run mhddos_proxy using proxy with ExpressVPN. Targets: --itarmy
   if [ $vpn == "3" -a $source_of_targets == "3" ]; then
