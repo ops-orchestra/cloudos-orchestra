@@ -6,6 +6,7 @@
 ### Відеоогляд:
 
 ![cloudos](docs/images/cloudos_youtube.jpg)
+[![cloudos](docs/images/cloudos_youtube.jpg)](https://www.youtube.com/watch?v=OLNZicyHHXo "Cloudos")
 
 ### Основні можливості на даний момент:
 
