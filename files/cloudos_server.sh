@@ -350,7 +350,7 @@ distress_run () {
     echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}IT Army ${RESET}"
     expressvpn disconnect
     sleep 5
-    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS -t targets.txt
+    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS
   fi
 
   # Run distress using proxy list with ExpressVPN. Targets: --itarmy
@@ -361,9 +361,8 @@ distress_run () {
     echo -e "${YELLOW}Distress threads:     ${RESET} ${GREEN}$DISTRESS_THREADS ${RESET}"
     echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}IT Army ${RESET}"
     expressvpn_configure
-    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS -t targets.txt
+    docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS
   fi
-  else
     echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
   fi
 }
