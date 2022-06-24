@@ -362,7 +362,7 @@ distress_run () {
     echo -e "${YELLOW}Targets:            ${RESET} ${GREEN}IT Army ${RESET}"
     expressvpn_configure
     docker run -it --rm --name distress_container --pull always $DISTRESS_SOURCE -c $DISTRESS_THREADS
-  fi
+  else
     echo -e "${RED}Error: Unknown parameter${RESET}"; exit 1
   fi
 }
